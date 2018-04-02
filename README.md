@@ -1,4 +1,4 @@
-## @amarajs/plugin-events
+## [@amarajs/plugin-events](https://github.com/amarajs/plugin-events)
 
 Plugin middleware for AmaraJS to add events to DOM nodes dynamically.
 
@@ -72,7 +72,7 @@ amara.add({
 
 If an action is allowed to bubble all the way up to the node that was used to bootstrap your `amara` instance, then the `@amarajs/plugin-events` middleware will dispatch the action through AmaraJS, ensuring any other middleware that you registered has a chance to handle the action accordingly.
 
-This enables contextual interception and modification of actions before they reach your middleware. For example, you could prevent an action from being dispatched to your `@amarajs/plugin-redux` middleware by simply stopping its propagation:
+This enables contextual interception and modification of actions before they reach your middleware. For example, you could prevent an action from being dispatched to your [`@amarajs/plugin-redux`](https://github.com/amarajs/plugin-redux) middleware by simply stopping its propagation:
 
 ```javascript
 amara.add({
@@ -297,7 +297,7 @@ This plugin has no customization options.
 
 If you have a feature request, please create a new issue so the community can discuss it.
 
-If you find a defect, please submit a bug report that includes a working link to reproduce the problem (for example, using [jsBin](https://jsbin.com)). Of course, pull requests to fix open issues are always welcome!
+If you find a defect, please submit a bug report that includes a working link to reproduce the problem (for example, using [this fiddle](https://jsfiddle.net/04f3v2x4/)). Of course, pull requests to fix open issues are always welcome!
 
 ### License
 
