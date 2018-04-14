@@ -79,13 +79,13 @@ export default function AmaraPluginEvents(): AmaraEvents {
             };
             meta.disabled = target.hasAttribute('disabled');
             target.removeAttribute('disabled');
-            target.setAttribute = (attr, value) => {
+            (target: any).setAttribute = (attr, value) => {
                 if (attr !== 'disabled') {
                     return meta.orig.setAttribute.call(target, attr, value);
                 }
                 meta.disabled = true;
             };
-            target.removeAttribute = (attr) => {
+            (target: any).removeAttribute = (attr) => {
                 if (attr !== 'disabled') {
                     return meta.orig.removeAttribute.call(target, attr);
                 }
@@ -94,13 +94,13 @@ export default function AmaraPluginEvents(): AmaraEvents {
         }
 
         function postPatchDisabledBug(target, meta) {
-            target.setAttribute = meta.orig.setAttribute;
-            target.removeAttribute = meta.orig.removeAttribute;
+            (target: any).setAttribute = meta.orig.setAttribute;
+            (target: any).removeAttribute = meta.orig.removeAttribute;
             meta.disabled ? target.setAttribute('disabled', '') : target.removeAttribute('disabled');
         }
 
-        function getTargetDispatcher(target) {
-            return function dispatchActionAsEvent(action: Action, eventInitOptions = {
+        function getTargetDispatcher(target: Element) {
+            return function dispatchActionAsEvent(action: any, eventInitOptions: {[string]: any} = {
                 bubbles: true,
                 cancelable: true,
                 composed: true
@@ -119,13 +119,13 @@ export default function AmaraPluginEvents(): AmaraEvents {
         }
 
         function addHandlerForEvent(eventAndSelectors) {
-            let arrHandlers: EventHandler[],
+            let arrHandlers: void|EventHandler[],
                 mapEventHandlers: void|Map<string, EventHandler[]>;
             const { map, target, dispatcher } = this;
-            const [ eventMeta: String, selectors: String = '' ] =
+            const [ eventMeta: string, selectors: string = '' ] =
                 (rxEventAndSelectors.exec(eventAndSelectors) || []).slice(1);
             const handler: EventHandler = map[eventAndSelectors];
-            const delegates: String[] = selectors
+            const delegates: string[] = selectors
                 .split(',')
                 .map(trim)
                 .filter(Boolean);
@@ -134,7 +134,8 @@ export default function AmaraPluginEvents(): AmaraEvents {
                 .map(trimLower)
                 .map(asMeta);
             function eventHandler(e: Event) {
-                let result, metaValue = fixMeta(String(e[metaEventMap[e.type]]).toLowerCase());
+                const prop: string = metaEventMap[e.type];
+                let result, metaValue = fixMeta(String((e: any)[prop]).toLowerCase());
                 if (delegates.length && !delegates.some(matches, e.target)) {
                     return;
                 }
@@ -142,7 +143,7 @@ export default function AmaraPluginEvents(): AmaraEvents {
                     return;
                 }
                 async = false;
-                e.dispatch = dispatcher;
+                (e: any).dispatch = dispatcher;
                 result = handler.call(this, e);
                 async = true;
                 return result;
@@ -156,7 +157,9 @@ export default function AmaraPluginEvents(): AmaraEvents {
                 targetHandlers.set(target, mapEventHandlers = new Map());
             }
             arrHandlers = mapEventHandlers.get(event);
-            arrHandlers || mapEventHandlers.set(event, arrHandlers = []);
+            if (!arrHandlers) {
+                mapEventHandlers.set(event, arrHandlers = []);
+            }
             target.addEventListener(event, eventHandler);
             arrHandlers.push(eventHandler);
         }
@@ -166,7 +169,7 @@ export default function AmaraPluginEvents(): AmaraEvents {
             Object.keys(map).forEach(addHandlerForEvent, this);
         }
 
-        function applyEventsToTarget(results: EventMap[], target: Node) {
+        function applyEventsToTarget(results: EventMap[], target: Element) {
             const context = {
                 target,
                 added: false,
@@ -180,7 +183,7 @@ export default function AmaraPluginEvents(): AmaraEvents {
             syncDispatch(context.dispatcher, {type: 'amara:apply'});
         }
 
-        function removeTargetHandlers(target: Node) {
+        function removeTargetHandlers(target: Element) {
             const mapHandlerWrapper: void|Map<string, EventHandler[]> = targetHandlers.get(target);
             if (mapHandlerWrapper) {
                 syncDispatch(getTargetDispatcher(target), {type: 'amara:remove'});
@@ -217,7 +220,7 @@ type Dispatch = (action: Action) => void;
 
 type AmaraEvents = (dispatch: Dispatch) => (action: Action) => void;
 
-type EventHandler = (e?: Event) => ?boolean
+type EventHandler = (e: Event) => ?boolean
 
 type EventMap = {
     [name: string]: EventHandler
